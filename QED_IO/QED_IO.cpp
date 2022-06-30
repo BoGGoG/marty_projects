@@ -20,6 +20,7 @@ std::vector<csl::Expr> square_amplitude_indivually(mty::Amplitude process_ampl, 
         auto ampl = mty::Amplitude(opts, diagram, kinematics);
         auto square = model.computeSquaredAmplitude(ampl);
         auto square_eval = Evaluated(square, eval::abbreviation);
+        // auto square_eval = square;
         squared_ampl_expressions.push_back(square_eval);
     }
     
@@ -39,12 +40,14 @@ int main(int argc, char *argv[])
     AddParticle(QED, electron);
     Rename(QED, "A_U1_em", "A");
     Particle photon = GetParticle(QED, "A");
+    Particle c_A = QED.getParticle("c_A");
 
     auto rules = ComputeFeynmanRules(QED);
 
     map<string, Particle> particles_dic = {
         {"electron", electron},
         {"photon", photon},
+        {"c_A", c_A}
     };
 
     auto pin1 = particles_dic[argv[1]];
@@ -58,16 +61,19 @@ int main(int argc, char *argv[])
     cout << "outgoing 2: " << argv[4] << ", " << pout2 << endl;
 
 
-    auto process_ampl = QED.computeAmplitude(Order::TreeLevel,
+    auto process_ampl = QED.computeAmplitude(Order::TreeLevel,  // OneLoop, TreeLevel
                                         {Incoming(pin1),
                                          Incoming(pin2),
                                          Outgoing(pout1),
                                          Outgoing(pout2)});
 
+    Show(process_ampl);
+
 
     std::vector<csl::Expr> ampl_expressions = {};
     for (size_t i = 0; i!=process_ampl.size(); i++){
         auto diagram_ampl_eval = Evaluated(process_ampl.expression(i), eval::abbreviation);
+        // auto diagram_ampl_eval = process_ampl.expression(i);
         ampl_expressions.push_back(diagram_ampl_eval);
     }
 
@@ -83,6 +89,15 @@ int main(int argc, char *argv[])
     for(size_t i=0; i!=squared_ampl_expressions.size(); i++){
         cout << squared_ampl_expressions[i] << endl;
     }
+
+    // auto particles = QED.getPhysicalParticles();
+    // cout << "particles:" << endl;
+    // for(size_t i=0; i!=particles.size(); i++){
+    //     cout << particles[i]->getName();
+    //     cout << ", spin dimension: " << particles[i]->getSpinDimension();
+    //     cout << ", " << particles[i] << endl;
+    // }
+
 
     return 0;
 }
