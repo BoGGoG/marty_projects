@@ -1,6 +1,7 @@
 #include <marty.h>
 #include <map>
 // #include <vector>
+#include <typeinfo>
 
 using namespace csl;
 using namespace mty;
@@ -27,6 +28,26 @@ std::vector<csl::Expr> square_amplitude_indivually(mty::Amplitude process_ampl, 
     return squared_ampl_expressions;
 };
 
+mty::Insertion get_insertion(string name){
+    if (name == "in_electron")
+        return Incoming("e");
+    else if (name == "in_anti_electron")
+        return Incoming(AntiPart("e"));
+    else if (name == "in_photon")
+        return Incoming("A");
+    else if (name == "out_electron")
+        return Outgoing("e");
+    else if (name == "out_anti_electron")
+        return Outgoing(AntiPart("e"));
+    else if (name == "out_photon")
+        return Outgoing("A");
+    else {
+    cout << "particle" << name << "not found, returning electron" << endl;
+    return Incoming("e");
+    }
+}
+
+
 int main(int argc, char *argv[])
 {
 
@@ -44,40 +65,32 @@ int main(int argc, char *argv[])
 
     auto rules = ComputeFeynmanRules(QED);
 
-    map<string, Particle> particles_dic = {
-        {"electron", electron},
-        {"photon", photon},
-        {"c_A", c_A}
-    };
+    auto pin1 = get_insertion(argv[1]);
+    auto pin2 = get_insertion(argv[2]);
+    auto pout1 = get_insertion(argv[3]);
+    auto pout2 = get_insertion(argv[4]);
 
-    auto pin1 = particles_dic[argv[1]];
-    auto pin2 = particles_dic[argv[2]];
-    auto pout1 = particles_dic[argv[3]];
-    auto pout2 = particles_dic[argv[4]];
-
-    cout << "incoming 1: " << argv[1] << ", " << pin1 << endl;
-    cout << "incoming 2: " << argv[2] << ", " << pin2 << endl;
-    cout << "outgoing 1: " << argv[3] << ", " << pout1 << endl;
-    cout << "outgoing 2: " << argv[4] << ", " << pout2 << endl;
-
+    cout << "incoming 1: " << argv[1] << ", " << pin1.getField() << endl;
+    cout << "incoming 2: " << argv[2] << ", " << pin2.getField() << endl;
+    cout << "outgoing 1: " << argv[3] << ", " << pout1.getField() << endl;
+    cout << "outgoing 2: " << argv[4] << ", " << pout2.getField() << endl;
 
     auto process_ampl = QED.computeAmplitude(Order::TreeLevel,  // OneLoop, TreeLevel
-                                        {Incoming(pin1),
-                                         Incoming(pin2),
-                                         Outgoing(pout1),
-                                         Outgoing(pout2)});
-
-    Show(process_ampl);
-
-
+                                        {
+                                        pin1,
+                                        pin2,
+                                        pout1,
+                                        pout2
+                                        });
+    // Show(process_ampl);
+    
     std::vector<csl::Expr> ampl_expressions = {};
     for (size_t i = 0; i!=process_ampl.size(); i++){
         auto diagram_ampl_eval = Evaluated(process_ampl.expression(i), eval::abbreviation);
-        // auto diagram_ampl_eval = process_ampl.expression(i);
         ampl_expressions.push_back(diagram_ampl_eval);
     }
 
-    
+
     std::vector<csl::Expr> squared_ampl_expressions = square_amplitude_indivually(process_ampl, QED);
 
     std::cout << "AMPLITUDES:" << std::endl;
@@ -89,15 +102,6 @@ int main(int argc, char *argv[])
     for(size_t i=0; i!=squared_ampl_expressions.size(); i++){
         cout << squared_ampl_expressions[i] << endl;
     }
-
-    // auto particles = QED.getPhysicalParticles();
-    // cout << "particles:" << endl;
-    // for(size_t i=0; i!=particles.size(); i++){
-    //     cout << particles[i]->getName();
-    //     cout << ", spin dimension: " << particles[i]->getSpinDimension();
-    //     cout << ", " << particles[i] << endl;
-    // }
-
 
     return 0;
 }
