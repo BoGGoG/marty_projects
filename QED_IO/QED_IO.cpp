@@ -2,6 +2,7 @@
 #include <map>
 // #include <vector>
 #include <typeinfo>
+// #include <cxxopts.hpp>
 
 using namespace csl;
 using namespace mty;
@@ -29,17 +30,17 @@ std::vector<csl::Expr> square_amplitude_indivually(mty::Amplitude process_ampl, 
 };
 
 mty::Insertion get_insertion(string name){
-    if (name == "in_electron")
+    if ((name == "in_normal_electron") || (name == "in_electron"))
         return Incoming("e");
     else if (name == "in_anti_electron")
         return Incoming(AntiPart("e"));
-    else if (name == "in_photon")
+    else if ((name == "in_photon") || (name == "in_normal_photon"))
         return Incoming("A");
-    else if (name == "out_electron")
+    else if ((name == "out_electron") || (name == "out_normal_electron"))
         return Outgoing("e");
     else if (name == "out_anti_electron")
         return Outgoing(AntiPart("e"));
-    else if (name == "out_photon")
+    else if ((name == "out_photon") || (name == "out_normal_photon"))
         return Outgoing("A");
     else {
     cout << "particle" << name << "not found, returning electron" << endl;
@@ -48,9 +49,11 @@ mty::Insertion get_insertion(string name){
 }
 
 
+/*
+ * argv[1]-argv[4]: 
+*/
 int main(int argc, char *argv[])
 {
-
     Model QED;
     AddGaugedGroup(QED, group::Type::U1, "U1_em", constant_s("e"));
     Init(QED);
@@ -65,24 +68,20 @@ int main(int argc, char *argv[])
 
     auto rules = ComputeFeynmanRules(QED);
 
-    auto pin1 = get_insertion(argv[1]);
-    auto pin2 = get_insertion(argv[2]);
-    auto pout1 = get_insertion(argv[3]);
-    auto pout2 = get_insertion(argv[4]);
+    std::vector<mty::Insertion> insertions;
+    for (size_t i = 1; i!= argc; i++){
+        insertions.push_back(get_insertion(argv[i]));
+    }
 
-    cout << "incoming 1: " << argv[1] << ", " << pin1.getField() << endl;
-    cout << "incoming 2: " << argv[2] << ", " << pin2.getField() << endl;
-    cout << "outgoing 1: " << argv[3] << ", " << pout1.getField() << endl;
-    cout << "outgoing 2: " << argv[4] << ", " << pout2.getField() << endl;
+    cout << "incoming 1: " << argv[1] << ", " << insertions[0].getField() << endl;
+    cout << "incoming 2: " << argv[2] << ", " << insertions[1].getField() << endl;
+    cout << "outgoing 1: " << argv[3] << ", " << insertions[2].getField() << endl;
+    cout << "outgoing 2: " << argv[4] << ", " << insertions[3].getField() << endl;
 
     auto process_ampl = QED.computeAmplitude(Order::TreeLevel,  // OneLoop, TreeLevel
-                                        {
-                                        pin1,
-                                        pin2,
-                                        pout1,
-                                        pout2
-                                        });
-    // Show(process_ampl);
+                                        insertions
+    );
+    Show(process_ampl);
     
     std::vector<csl::Expr> ampl_expressions = {};
     for (size_t i = 0; i!=process_ampl.size(); i++){
