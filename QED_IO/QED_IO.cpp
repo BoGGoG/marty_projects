@@ -31,6 +31,7 @@ std::vector<csl::Expr> square_amplitude_indivually(mty::Amplitude process_ampl, 
     return squared_ampl_expressions;
 };
 
+
 mty::Insertion get_insertion(string name){
     if ((name == "in_normal_electron") || (name == "in_electron"))
         return Incoming("e");
@@ -49,6 +50,7 @@ mty::Insertion get_insertion(string name){
     return Incoming("e");
     }
 }
+
 
 void print_help_func(){
     cout << "help" << endl;
@@ -122,60 +124,51 @@ int main(int argc, char *argv[])
     auto process_ampl = QED.computeAmplitude(Order::TreeLevel,  // OneLoop, TreeLevel
                                         insertions
     );
-
-    if (print_diagrams){
-        Show(process_ampl);
-    }
-
     std::vector<csl::Expr> ampl_expressions = {};
+    std::vector<csl::Expr> squared_ampl_expressions = square_amplitude_indivually(process_ampl, QED);
+
     for (size_t i = 0; i!=process_ampl.size(); i++){
         auto diagram_ampl_eval = Evaluated(process_ampl.expression(i), eval::abbreviation);
         ampl_expressions.push_back(diagram_ampl_eval);
     }
 
-
-    std::vector<csl::Expr> squared_ampl_expressions = square_amplitude_indivually(process_ampl, QED);
-
-    std::cout << "AMPLITUDES:" << std::endl;
-    for(size_t i=0; i!=ampl_expressions.size(); i++){
-        cout << ampl_expressions[i] << endl;
+    // std::cout << "AMPLITUDES:" << std::endl;
+    // for(size_t i=0; i!=ampl_expressions.size(); i++){
+    //     cout << ampl_expressions[i] << endl;
+    // }
+    // std::cout << "SQUARED AMPLITUDES:" << std::endl;
+    // for(size_t i=0; i!=squared_ampl_expressions.size(); i++){
+    //     cout << squared_ampl_expressions[i] << endl;
+    // }
+    //
+    if (print_diagrams){
+        Show(process_ampl);
     }
 
-    std::cout << "SQUARED AMPLITUDES:" << std::endl;
-    for(size_t i=0; i!=squared_ampl_expressions.size(); i++){
-        cout << squared_ampl_expressions[i] << endl;
-    }
 
+    // EXPORT TO FILES
     std::ofstream ampl_file_handle;
-    if (append_files)
+    std::ofstream insertions_file_handle;
+    std::ofstream sqampl_file_handle;
+    if (append_files){
         ampl_file_handle.open(amplitudes_file, std::ios_base::app);
-    else
+        sqampl_file_handle.open(sqamplitudes_file, std::ios_base::app);
+        insertions_file_handle.open(insertions_file, std::ios_base::app);
+    }
+    else{
         ampl_file_handle.open(amplitudes_file);
+        sqampl_file_handle.open(sqamplitudes_file);
+        insertions_file_handle.open(insertions_file);
+    }
 
     for(size_t i=0; i!=ampl_expressions.size(); i++){
         ampl_file_handle << ampl_expressions[i] << endl;
+        sqampl_file_handle << squared_ampl_expressions[i] << endl;
+        insertions_file_handle << particles_strings;
+        cout << "saved amplitude to file" << endl;
     }
     ampl_file_handle.close();
-
-    std::ofstream sqampl_file_handle;
-    if (append_files)
-        sqampl_file_handle.open(sqamplitudes_file, std::ios_base::app);
-    else
-        sqampl_file_handle.open(sqamplitudes_file);
-
-    for(size_t i=0; i!=squared_ampl_expressions.size(); i++){
-        sqampl_file_handle << squared_ampl_expressions[i] << endl;
-    }
     sqampl_file_handle.close();
-
-    std::ofstream insertions_file_handle;
-    if (append_files)
-        insertions_file_handle.open(insertions_file, std::ios_base::app);
-    else
-        insertions_file_handle.open(insertions_file);
-    for(size_t i=0; i!=squared_ampl_expressions.size(); i++){
-        insertions_file_handle << particles_strings;
-    }
     insertions_file_handle.close();
 
     return 0;
