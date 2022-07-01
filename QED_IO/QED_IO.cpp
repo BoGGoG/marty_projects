@@ -2,7 +2,8 @@
 #include <map>
 // #include <vector>
 #include <typeinfo>
-// #include <cxxopts.hpp>
+#include <cxxopts.hpp>
+#include <fstream>
 
 using namespace csl;
 using namespace mty;
@@ -10,6 +11,7 @@ using namespace mty;
 using std::cout; using std::cin;
 using std::endl; using std::string;
 using std::map; using std::copy;
+
 
 std::vector<csl::Expr> square_amplitude_indivually(mty::Amplitude process_ampl, mty::Model& model){
     auto opts = process_ampl.getOptions();
@@ -48,12 +50,52 @@ mty::Insertion get_insertion(string name){
     }
 }
 
+void print_help_func(){
+    cout << "help" << endl;
 
-/*
- * argv[1]-argv[4]: 
-*/
+    cout << "--help: print this help" << endl;
+    cout << "--particles=in_electron,in_anti_electron,out_photon: insertion arbitrary amount of insertion particles, separated by comma, no space." << endl;
+    cout << "--famplitudes: file where the amplitudes should be saved, default: out/ampl.txt" << endl;
+    cout << "--fsqamplitudes: file where the squared amplitudes should be saved, default: out/ampl_sq.txt" << endl;
+    cout << "--diagrams: If diagrams should be shown, default: false" << endl;
+    cout << "--append: If files should be appended or replaced" << endl;
+}
+
+
 int main(int argc, char *argv[])
 {
+    cxxopts::Options options("MyProgram", "One line description of MyProgram");
+    options.add_options()
+      ("h,help", "Print help", cxxopts::value<bool>()->default_value("false")) // a bool parameter
+      ("a,famplitudes", "File name for amplitudes", cxxopts::value<std::string>()->default_value("out/ampl.txt"))
+      ("s,fsqamplitudes", "File name for squared amplitudes", cxxopts::value<std::string>()->default_value("out/ampl_sq.txt"))
+      ("i,finsertions", "File name for insertions", cxxopts::value<std::string>()->default_value("out/insertions.txt"))
+      ("d,diagrams", "Show diagrams", cxxopts::value<bool>()->default_value("false"))
+      ("p,particles", "Insertion particles", cxxopts::value<std::vector<std::string>>())
+      ("e,append", "append to files (extend)", cxxopts::value<bool>()->default_value("false"))
+      ;
+
+    auto opts = options.parse(argc, argv);
+    auto print_help = opts["help"].as<bool>();
+    auto print_diagrams = opts["diagrams"].as<bool>();
+    auto append_files = opts["append"].as<bool>();
+    auto particles_strings = opts["particles"].as<std::vector<std::string>>();
+    auto amplitudes_file = opts["famplitudes"].as<std::string>();
+    auto sqamplitudes_file = opts["fsqamplitudes"].as<std::string>();
+    auto insertions_file = opts["finsertions"].as<std::string>();
+
+    if (print_help){
+        print_help_func();
+        return 0;
+    };
+    cout << "Will export amplitudes to " << amplitudes_file << endl;
+    cout << "Will export squared amplitudes to " << sqamplitudes_file << endl;
+    if (append_files)
+        cout << "Files will be appended if they exist." << endl;
+    else
+        cout << "Files will be overwritten if they exist." << endl;
+
+
     Model QED;
     AddGaugedGroup(QED, group::Type::U1, "U1_em", constant_s("e"));
     Init(QED);
@@ -69,20 +111,22 @@ int main(int argc, char *argv[])
     auto rules = ComputeFeynmanRules(QED);
 
     std::vector<mty::Insertion> insertions;
-    for (size_t i = 1; i!= argc; i++){
-        insertions.push_back(get_insertion(argv[i]));
+    for (size_t i = 0; i!= particles_strings.size(); i++){
+        insertions.push_back(get_insertion(particles_strings[i]));
     }
 
-    cout << "incoming 1: " << argv[1] << ", " << insertions[0].getField() << endl;
-    cout << "incoming 2: " << argv[2] << ", " << insertions[1].getField() << endl;
-    cout << "outgoing 1: " << argv[3] << ", " << insertions[2].getField() << endl;
-    cout << "outgoing 2: " << argv[4] << ", " << insertions[3].getField() << endl;
+    for (size_t i = 0; i!= particles_strings.size(); i++){
+        cout << particles_strings[i] << ", " << insertions[i].getField() << endl;
+    }
 
     auto process_ampl = QED.computeAmplitude(Order::TreeLevel,  // OneLoop, TreeLevel
                                         insertions
     );
-    Show(process_ampl);
-    
+
+    if (print_diagrams){
+        Show(process_ampl);
+    }
+
     std::vector<csl::Expr> ampl_expressions = {};
     for (size_t i = 0; i!=process_ampl.size(); i++){
         auto diagram_ampl_eval = Evaluated(process_ampl.expression(i), eval::abbreviation);
@@ -101,6 +145,38 @@ int main(int argc, char *argv[])
     for(size_t i=0; i!=squared_ampl_expressions.size(); i++){
         cout << squared_ampl_expressions[i] << endl;
     }
+
+    std::ofstream ampl_file_handle;
+    if (append_files)
+        ampl_file_handle.open(amplitudes_file, std::ios_base::app);
+    else
+        ampl_file_handle.open(amplitudes_file);
+
+    for(size_t i=0; i!=ampl_expressions.size(); i++){
+        ampl_file_handle << ampl_expressions[i] << endl;
+    }
+    ampl_file_handle.close();
+
+    std::ofstream sqampl_file_handle;
+    if (append_files)
+        sqampl_file_handle.open(sqamplitudes_file, std::ios_base::app);
+    else
+        sqampl_file_handle.open(sqamplitudes_file);
+
+    for(size_t i=0; i!=squared_ampl_expressions.size(); i++){
+        sqampl_file_handle << squared_ampl_expressions[i] << endl;
+    }
+    sqampl_file_handle.close();
+
+    std::ofstream insertions_file_handle;
+    if (append_files)
+        insertions_file_handle.open(insertions_file, std::ios_base::app);
+    else
+        insertions_file_handle.open(insertions_file);
+    for(size_t i=0; i!=squared_ampl_expressions.size(); i++){
+        insertions_file_handle << particles_strings;
+    }
+    insertions_file_handle.close();
 
     return 0;
 }
