@@ -13,7 +13,7 @@ using std::endl; using std::string;
 using std::map; using std::copy;
 
 
-std::vector<csl::Expr> square_amplitude_indivually(mty::Amplitude process_ampl, mty::Model& model){
+std::vector<csl::Expr> square_amplitude_individually(mty::Amplitude process_ampl, mty::Model& model){
     auto opts = process_ampl.getOptions();
     auto kinematics = process_ampl.getKinematics();
     std::vector<mty::FeynmanDiagram> diagrams = process_ampl.getDiagrams();
@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
                                         insertions
     );
     std::vector<csl::Expr> ampl_expressions = {};
-    std::vector<csl::Expr> squared_ampl_expressions = square_amplitude_indivually(process_ampl, QED);
+    std::vector<csl::Expr> squared_ampl_expressions = square_amplitude_individually(process_ampl, QED);
 
     for (size_t i = 0; i!=process_ampl.size(); i++){
         auto diagram_ampl_eval = Evaluated(process_ampl.expression(i), eval::abbreviation);
