@@ -147,6 +147,9 @@ int main(int argc, char *argv[])
 
 
     // EXPORT TO FILES
+    if (ampl_expressions.size() == 0){
+        return 0;
+    }
     std::ofstream ampl_file_handle;
     std::ofstream insertions_file_handle;
     std::ofstream sqampl_file_handle;
