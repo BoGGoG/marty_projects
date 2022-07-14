@@ -35,5 +35,5 @@
 *.out
 *.app
 
-*.idea/*
-*make/*
+*/.idea/*
+*/make/*
