@@ -37,4 +37,4 @@
 
 */.idea/*
 */make/*
-!**/__pycache__/
+**/__pycache__/
