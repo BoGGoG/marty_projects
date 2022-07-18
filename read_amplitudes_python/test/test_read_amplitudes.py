@@ -43,9 +43,9 @@ def test_fix_operator_num_args():
     expression_3 = get_tree(["Sum", "(", "2", "a", "b", ")"])
     assert fix_operator_num_args(expression_3, op="Sum") == ["Sum", "2", ["Sum", "a", "b"]]
     expression_4 = get_tree(["Prod", "(", "2", "a", "b", "Prod", "(", "c", "d", ")", ")"])
-#
-# def test_fix_tree():
-#     expression_3 = get_tree(["Prod", "(", "2", "a", "b", "Sum", "(", "c", "d", "1", ")", ")"])
-#     expression_4 = get_tree(["Sum", "(", "2", "a", "b", "Sum", "(", "c", "d", "1", ")", ")"])
-#     assert fix_tree(expression_3) == list(more_itertools.collapse(['Prod', '2', ['Prod', 'a', ['Prod', 'b', ['Sum', 'c', ['Sum', 'd', '1']]]]]))
-#     assert fix_tree(expression_4) == list(more_itertools.collapse(['Sum', '2', ['Sum', 'a', 'b', ['Sum', 'c', ['Sum', 'd', '1']]]]))
+
+def test_fix_tree():
+    expression_3 = get_tree(["Prod", "(", "2", "a", "b", "Sum", "(", "c", "d", "1", ")", ")"])
+    expression_4 = get_tree(["Sum", "(", "2", "a", "b", "Sum", "(", "c", "d", "1", ")", ")"])
+    assert fix_tree(expression_3) == list(more_itertools.collapse(['Prod', '2', ['Prod', 'a', ['Prod', 'b', ['Sum', 'c', ['Sum', 'd', '1']]]]]))
+    assert fix_tree(expression_4) == list(more_itertools.collapse(['Sum', '2', ['Sum', 'a', 'b', ['Sum', 'c', ['Sum', 'd', '1']]]]))
