@@ -46,6 +46,8 @@ int main()
                                       Outgoing(electron),
                                       Outgoing(electron)});
 
+
+
     for (size_t i = 0; i!=process_ampl.size(); i++){
         std::cout << "i = " << i << std::endl;
         auto diagram_ampl_eval = Evaluated(process_ampl.expression(i), eval::abbreviation);

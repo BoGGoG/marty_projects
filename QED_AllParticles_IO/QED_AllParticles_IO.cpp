@@ -175,6 +175,7 @@ int main(int argc, char *argv[]){
       ("h,help", "Print help", cxxopts::value<bool>()->default_value("false")) // a bool parameter
       ("a,famplitudes", "File name for amplitudes", cxxopts::value<std::string>()->default_value("out/ampl.txt"))
       ("s,fsqamplitudes", "File name for squared amplitudes", cxxopts::value<std::string>()->default_value("out/ampl_sq.txt"))
+      ("r,fsqamplitudes_raw", "File name for raw squared amplitudes", cxxopts::value<std::string>()->default_value("out/ampl_sq_raw.txt"))
       ("i,finsertions", "File name for insertions", cxxopts::value<std::string>()->default_value("out/insertions.txt"))
       ("d,diagrams", "Show diagrams", cxxopts::value<bool>()->default_value("false"))
       ("p,particles", "Insertion particles", cxxopts::value<std::vector<std::string>>())
@@ -188,6 +189,7 @@ int main(int argc, char *argv[]){
     auto particles_strings = opts["particles"].as<std::vector<std::string>>();
     auto amplitudes_file = opts["famplitudes"].as<std::string>();
     auto sqamplitudes_file = opts["fsqamplitudes"].as<std::string>();
+    auto sqamplitudes_raw_file = opts["fsqamplitudes_raw"].as<std::string>();
     auto insertions_file = opts["finsertions"].as<std::string>();
 
     if (print_help){
@@ -196,6 +198,7 @@ int main(int argc, char *argv[]){
     };
     cout << "Will export amplitudes to " << amplitudes_file << endl;
     cout << "Will export squared amplitudes to " << sqamplitudes_file << endl;
+    cout << "Will export raw squared amplitudes to " << sqamplitudes_raw_file << endl;
     if (append_files)
         cout << "Files will be appended if they exist." << endl;
     else
@@ -317,14 +320,17 @@ int main(int argc, char *argv[]){
     std::ofstream ampl_file_handle;
     std::ofstream insertions_file_handle;
     std::ofstream sqampl_file_handle;
+    std::ofstream sqampl_raw_file_handle;
     if (append_files){
     ampl_file_handle.open(amplitudes_file, std::ios_base::app);
     sqampl_file_handle.open(sqamplitudes_file, std::ios_base::app);
+    sqampl_raw_file_handle.open(sqamplitudes_raw_file, std::ios_base::app);
     insertions_file_handle.open(insertions_file, std::ios_base::app);
     }
     else{
     ampl_file_handle.open(amplitudes_file);
     sqampl_file_handle.open(sqamplitudes_file);
+    sqampl_raw_file_handle.open(sqamplitudes_raw_file);
     insertions_file_handle.open(insertions_file);
     }
 
@@ -334,11 +340,13 @@ int main(int argc, char *argv[]){
     // insertions_file_handle << particles_strings;
     to_prefix_notation(ampl_expressions[i], ampl_file_handle);
     to_prefix_notation(squared_ampl_expressions[i], sqampl_file_handle);
+    sqampl_raw_file_handle << squared_ampl_expressions[i] << endl;
     insertions_file_handle << particles_strings << endl;
-    cout << "saved amplitude to file" << endl;
     }
+
     ampl_file_handle.close();
     sqampl_file_handle.close();
+    sqampl_raw_file_handle.close();
     insertions_file_handle.close();
 
     return 0;

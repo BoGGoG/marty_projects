@@ -13,6 +13,27 @@ using std::endl; using std::string;
 using std::map; using std::copy;
 
 
+void to_prefix_notation_rec(Expr &expr, std::ofstream &stream) {
+    int num_args = expr->size();
+    if (num_args == 0){
+        stream << expr << ";";
+    } else {
+        stream << expr->getType() << ";";
+        stream << "(" << ";";
+        for (size_t i = 0; i!=expr->size(); i++){
+            auto arg = expr->getArgument(i);
+            to_prefix_notation_rec(arg, stream);
+        }
+        stream << ")" << ";";
+    }
+}
+
+void to_prefix_notation(Expr &expr, std::ofstream &stream){
+    to_prefix_notation_rec(expr, stream);
+    stream << endl;
+}
+
+
 std::vector<csl::Expr> square_amplitude_individually(mty::Amplitude process_ampl, mty::Model& model){
     auto opts = process_ampl.getOptions();
     auto kinematics = process_ampl.getKinematics();
@@ -132,22 +153,24 @@ int main(int argc, char *argv[])
         ampl_expressions.push_back(diagram_ampl_eval);
     }
 
-    // std::cout << "AMPLITUDES:" << std::endl;
-    // for(size_t i=0; i!=ampl_expressions.size(); i++){
-    //     cout << ampl_expressions[i] << endl;
-    // }
-    // std::cout << "SQUARED AMPLITUDES:" << std::endl;
-    // for(size_t i=0; i!=squared_ampl_expressions.size(); i++){
-    //     cout << squared_ampl_expressions[i] << endl;
-    // }
-    //
+    std::cout << "AMPLITUDES:" << std::endl;
+    for(size_t i=0; i!=ampl_expressions.size(); i++){
+        cout << ampl_expressions[i] << endl;
+    }
+    std::cout << "SQUARED AMPLITUDES:" << std::endl;
+    for(size_t i=0; i!=squared_ampl_expressions.size(); i++){
+        cout << squared_ampl_expressions[i] << endl;
+    }
+
     if (print_diagrams){
         Show(process_ampl);
     }
 
 
     // EXPORT TO FILES
+    
     if (ampl_expressions.size() == 0){
+        // don't create files if no amplitudes for process
         return 0;
     }
     std::ofstream ampl_file_handle;
@@ -165,9 +188,12 @@ int main(int argc, char *argv[])
     }
 
     for(size_t i=0; i!=ampl_expressions.size(); i++){
-        ampl_file_handle << ampl_expressions[i] << endl;
-        sqampl_file_handle << squared_ampl_expressions[i] << endl;
-        insertions_file_handle << particles_strings;
+        // ampl_file_handle << ampl_expressions[i] << endl;
+        // sqampl_file_handle << squared_ampl_expressions[i] << endl;
+        // insertions_file_handle << particles_strings;
+        to_prefix_notation(ampl_expressions[i], ampl_file_handle);
+        to_prefix_notation(squared_ampl_expressions[i], sqampl_file_handle);
+        insertions_file_handle << particles_strings << endl;
         cout << "saved amplitude to file" << endl;
     }
     ampl_file_handle.close();

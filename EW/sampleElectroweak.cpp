@@ -5,21 +5,18 @@ using namespace std;
 using namespace csl;
 using namespace mty;
 
-// To be changed by the user if needed !
-std::string path_to_generated_library = ".";
-
 void to_prefix_notation_rec(Expr &expr, stringstream &stream) {
     int num_args = expr->size();
   if (num_args == 0){
-    stream << expr << ",";
+    stream << expr << ";";
   } else {
-    stream << expr->getType() << ",";
-    stream << "(" << ",";
+    stream << expr->getType() << ";";
+    stream << "(" << ";";
     for (size_t i = 0; i!=expr->size(); i++){
       auto arg = expr->getArgument(i);
      to_prefix_notation_rec(arg, stream);
     }
-    stream << ")" << ",";
+    stream << ")" << ";";
   }
 }
 
@@ -110,54 +107,42 @@ int main() {
     // cout << toyModel << endl;
 
     auto rules = toyModel.getFeynmanRules();
-    // Display(rules); // Displays expressions in terminal
-    // Show(rules); // Shows diagrams in the application
-    //
+
+    // auto res = toyModel.computeAmplitude(
+    //    Order::TreeLevel,
+    //    {Incoming("u"), Incoming(AntiPart("u")),
+    //    Outgoing("d"), Outgoing(AntiPart("d"))}
+    //    );
     //
     auto res = toyModel.computeAmplitude(
        Order::TreeLevel,
-       {Incoming("u"), Incoming(AntiPart("u")),
-       Outgoing("d"), Outgoing(AntiPart("d"))}
+       {Incoming("W"), Incoming(AntiPart("u")),
+       Outgoing("W"), Outgoing(AntiPart("u"))}
        );
+
     //
     // Display(res);
     // DisplayAbbreviations();
-    // Show(res);
+    Show(res);
     //
 
-
-    Expr squared_ampl = toyModel.computeSquaredAmplitude(res);
-    cout << "total squared amplitude:" <<endl;
-    cout << squared_ampl << endl;
     //
-    // mty::Library myLib("toy", path_to_generated_library);
-    // myLib.addFunction("squared_ampl", squared_ampl);
-    // myLib.build();
+    // Expr squared_ampl = toyModel.computeSquaredAmplitude(res);
+    // cout << "total squared amplitude:" <<endl;
+    // cout << squared_ampl << endl;
     //
-    
-    cout << "=== Terms:" << endl;
-    for (size_t i = 0; i!= res.size(); i++) {
-        Expr &term = res.expression(i);
-        cout << "i = " << i << endl;
-        // cout << term << endl;
-        cout << Evaluated(term, eval::abbreviation) << endl;
-    }
-
-    // cout << "------------" << endl;
-    // cout << "Going through expression i=0:" << endl;
-    // auto expr0 = res.expression(0);
-    // cout << "expr0 : " << expr0 << endl;
-    // cout << "expr0 type: " <<  expr0->getType() << endl;
-    // cout << "expr0 arg 0: " << expr0->getArgument() << endl;
-    // cout << "expr0 arg 1: " << expr0->getArgument(1) << endl;
-    // cout << "expr0 arg 2: " << expr0->getArgument(2) << endl;
-
-    // cout << "expr0 arg 2 arg 0" << expr0->getArgument(2)->getArgument(0) << endl;
-
-    cout << "=== Abbreviations:" << endl;
-    DisplayAbbreviations();
-    
-
+    // cout << "=== Terms:" << endl;
+    // for (size_t i = 0; i!= res.size(); i++) {
+    //     Expr &term = res.expression(i);
+    //     cout << "i = " << i << endl;
+    //     // cout << term << endl;
+    //     cout << Evaluated(term, eval::abbreviation) << endl;
+    // }
+    //
+    // // cout << "=== Abbreviations:" << endl;
+    // // DisplayAbbreviations();
+    // 
+    //
     cout << "=== prefix notation:" << endl;
 
     for (size_t i = 0; i!= res.size(); i++){
@@ -167,6 +152,6 @@ int main() {
         to_prefix_notation(expr_eval, my_stream);
         cout << my_stream.str() << endl;
     }
-    
+    // 
     return 0;
 }

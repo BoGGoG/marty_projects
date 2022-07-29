@@ -33,13 +33,15 @@ particles_list = [
         "photon"
 ]
 
-def calc_amplitude(particles, ampl_file="out/ampl.txt",
+def calc_amplitude(particles, 
+        ampl_file="out/ampl.txt",
         sqampl_file="out/sq_ampl.txt",
+        sqampl_raw_file="out/sq_ampl_raw.txt",
         insertions_file="out/insertions.txt",
         log_file=False
         ):
 
-    options = "--particles=" + particles + " -e" + " -a " + ampl_file + " -s " + sqampl_file + " -i " + insertions_file
+    options = "--particles=" + particles + " -e" + " -a " + ampl_file + " -s " + sqampl_file + " -i " + insertions_file + " -r " + sqampl_raw_file
     if log_file:
         options = options + " > " + log_file
 
@@ -62,19 +64,19 @@ def get_possible_n_to_m(particles_list, n, m):
 
     return possible_two_to_two
 
-def run_all_n_to_m(particles_list, n, m, folders=["out/ampl/", "out/sq_ampl/", "out/insertions/",
-        "out/log/"], file_names=["ampl.txt", "sq_ampl.txt", "insertions.txt", "log.log"]):
+def run_all_n_to_m(particles_list, n, m, folders=["out/ampl/", "out/sq_ampl/", "out/sq_ampl_raw", "out/insertions/",
+        "out/log/"], file_names=["ampl.txt", "sq_ampl.txt", "sq_ampl_raw.txt", "insertions.txt", "log.log"]):
 
     possible_processes = get_possible_n_to_m(particles_list, n, m)
     print("Calculating all", n, "to", m, "processes.")
     print("number of potential processes:", len(possible_processes))
 
-    ampl_folder, sqampl_folder, insertions_folder, log_folder = folders
+    ampl_folder, sqampl_folder, sqampl_raw_folder, insertions_folder, log_folder = folders
     ampl_folder = ampl_folder + "/" + str(n) + "to" + str(m) + "/"
     sqampl_folder = sqampl_folder + "/" + str(n) + "to" + str(m) + "/"
     insertions_folder = insertions_folder + "/" + str(n) + "to" + str(m) + "/"
     log_folder = log_folder + "/" + str(n) + "to" + str(m) + "/"
-    folders = [ampl_folder, sqampl_folder, insertions_folder, log_folder]
+    folders = [ampl_folder, sqampl_folder, sqampl_raw_folder, insertions_folder, log_folder]
 
     delete_folder(ampl_folder[:-1])
     delete_folder(sqampl_folder)
@@ -84,23 +86,25 @@ def run_all_n_to_m(particles_list, n, m, folders=["out/ampl/", "out/sq_ampl/", "
         run_process(process, folders, file_names)
 
 
-def run_all_n_to_m_parallel(particles_list, n, m, folders=["out/ampl/", "out/sq_ampl/", "out/insertions/",
-        "out/log/"], file_names=["ampl.txt", "sq_ampl.txt", "insertions.txt", "log.log"],
+def run_all_n_to_m_parallel(particles_list, n, m, folders=["out/ampl/", "out/sq_ampl/", "out/sq_ampl_raw/" "out/insertions/",
+        "out/log/"], file_names=["ampl.txt", "sq_ampl.txt", "sq_ampl_raw.txt", "insertions.txt", "log.log"],
         cpu_cores=2):
 
     possible_processes = get_possible_n_to_m(particles_list, n, m)
     print("Calculating all", n, "to", m, "processes.")
     print("number of potential processes:", len(possible_processes))
 
-    ampl_folder, sqampl_folder, insertions_folder, log_folder = folders
-    ampl_folder = ampl_folder + "/" + str(n) + "to" + str(m) + "/"
-    sqampl_folder = sqampl_folder + "/" + str(n) + "to" + str(m) + "/"
-    insertions_folder = insertions_folder + "/" + str(n) + "to" + str(m) + "/"
-    log_folder = log_folder + "/" + str(n) + "to" + str(m) + "/"
-    folders = [ampl_folder, sqampl_folder, insertions_folder, log_folder]
+    ampl_folder, sqampl_folder, sqampl_raw_folder, insertions_folder, log_folder = folders
+    ampl_folder = ampl_folder +  str(n) + "to" + str(m) + "/"
+    sqampl_folder = sqampl_folder +  str(n) + "to" + str(m) + "/"
+    sqampl_raw_folder = sqampl_raw_folder + str(n) + "to" + str(m) + "/"
+    insertions_folder = insertions_folder + str(n) + "to" + str(m) + "/"
+    log_folder = log_folder + str(n) + "to" + str(m) + "/"
+    folders = [ampl_folder, sqampl_folder, sqampl_raw_folder, insertions_folder, log_folder]
 
     delete_folder(ampl_folder[:-1])
     delete_folder(sqampl_folder)
+    delete_folder(sqampl_raw_folder)
     delete_folder(insertions_folder)
     delete_folder(log_folder)
 
@@ -120,8 +124,8 @@ def run_process_phelper(task):
     folders = task[1]
     return run_process(process_string, folders)
 
-def run_process(process_string, folders=["out/ampl/", "out/sq_ampl/", "out/insertions/",
-        "out/log/"], file_names=["ampl.txt", "sq_ampl.txt", "insertions.txt", "log.log"]):
+def run_process(process_string, folders=["out/ampl/", "out/sq_ampl/", "out/sq_ampl_raw", "out/insertions/",
+        "out/log/"], file_names=["ampl.txt", "sq_ampl.txt", "sq_ampl_raw.txt", "insertions.txt", "log.log"]):
     basenames_without_ext = [os.path.splitext(os.path.basename(f))[0] for f in file_names]
     extensions = [os.path.splitext(os.path.basename(f))[1] for f in file_names]
     _ = [Path(folder).mkdir(parents=True, exist_ok=True) for folder in folders]
@@ -130,10 +134,12 @@ def run_process(process_string, folders=["out/ampl/", "out/sq_ampl/", "out/inser
 
     ampl_file = folders[0]+basenames_without_ext[0]+"-"+process_string.replace(",", "-")+extensions[0]
     sq_ampl_file = folders[1]+basenames_without_ext[1]+"-"+process_string.replace(",", "-")+extensions[1]
-    insertions_file =  folders[2]+basenames_without_ext[2]+"-"+process_string.replace(",", "-")+extensions[2]
-    log_file =  folders[3]+basenames_without_ext[3]+"-"+process_string.replace(",", "-")+extensions[3]
+    sq_ampl_raw_file = folders[2]+basenames_without_ext[2]+"-"+process_string.replace(",", "-")+extensions[2]
+    insertions_file =  folders[3]+basenames_without_ext[3]+"-"+process_string.replace(",", "-")+extensions[3]
+    log_file =  folders[4]+basenames_without_ext[4]+"-"+process_string.replace(",", "-")+extensions[4]
     calc_amplitude(process_string, ampl_file=ampl_file,
             sqampl_file=sq_ampl_file,
+            sqampl_raw_file=sq_ampl_raw_file,
             insertions_file=insertions_file,
             log_file=log_file
             )
@@ -157,9 +163,10 @@ if __name__== "__main__":
     cpu_cores = 19
     ampl_folder = "out/ampl/"
     sqampl_folder = "out/sq_ampl/"
+    sqampl_raw_folder = "out/sq_ampl_raw/"
     insertions_folder = "out/insertions/"
     log_folder = "out/log/"
-    folders = [ampl_folder, sqampl_folder, insertions_folder, log_folder]
+    folders = [ampl_folder, sqampl_folder, sqampl_raw_folder, insertions_folder, log_folder]
 
     _ = Path(log_folder).mkdir(parents=True, exist_ok=True)
     logging.basicConfig(filename = 'out/log/general_log.log',
@@ -167,11 +174,11 @@ if __name__== "__main__":
                     format = '%(asctime)s:%(levelname)s:%(name)s:%(message)s')
 
 
-    # run_all_n_to_m_parallel(particles_list, 1, 2, folders, cpu_cores=cpu_cores)
-    # run_all_n_to_m_parallel(particles_list, 2, 1, folders, cpu_cores=cpu_cores)
-    # run_all_n_to_m_parallel(particles_list, 2, 2, folders, cpu_cores=cpu_cores)
-    # run_all_n_to_m_parallel(particles_list, 3, 1, folders, cpu_cores=cpu_cores)
-    # run_all_n_to_m_parallel(particles_list, 3, 2, folders, cpu_cores=cpu_cores)
-    # run_all_n_to_m_parallel(particles_list, 2, 3, folders, cpu_cores=cpu_cores)
-    # run_all_n_to_m_parallel(particles_list, 1, 3, folders, cpu_cores=cpu_cores)
-    run_all_n_to_m_parallel(particles_list, 3, 3, folders, cpu_cores=cpu_cores)
+    run_all_n_to_m_parallel(particles_list, 1, 2, folders, cpu_cores=cpu_cores)
+    run_all_n_to_m_parallel(particles_list, 2, 1, folders, cpu_cores=cpu_cores)
+    run_all_n_to_m_parallel(particles_list, 2, 2, folders, cpu_cores=cpu_cores)
+    run_all_n_to_m_parallel(particles_list, 3, 1, folders, cpu_cores=cpu_cores)
+    run_all_n_to_m_parallel(particles_list, 3, 2, folders, cpu_cores=cpu_cores)
+    run_all_n_to_m_parallel(particles_list, 2, 3, folders, cpu_cores=cpu_cores)
+    run_all_n_to_m_parallel(particles_list, 1, 3, folders, cpu_cores=cpu_cores)
+    # run_all_n_to_m_parallel(particles_list, 3, 3, folders, cpu_cores=cpu_cores)
