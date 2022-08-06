@@ -468,3 +468,12 @@ def unformat_integer(arr):
         ret += s
 
     return sp.parsing.parse_expr(ret)
+
+
+def simplify_and_prefix(expr):
+    """
+    Needed here because multiprocessing in a notebook does not take functions defined in the notebook ...
+    """
+    simplified = sp.factor(expr)   # worked best for simplification
+    prefix = sympy_to_prefix(simplified)
+    return prefix
