@@ -144,8 +144,10 @@ if start_fresh:
     if os.path.exists(progress_file):
         os.remove(progress_file)
     if os.path.exists(outfile_amplitudes):
+        print("Deleting "+outfile_amplitudes)
         os.remove(outfile_amplitudes)
     if os.path.exists(outfile_sqamplitudes):
+        print("Deleting "+outfile_sqamplitudes)
         os.remove(outfile_sqamplitudes)
 
     with open(progress_file, 'a') as f:
@@ -175,26 +177,26 @@ else:
 
 batches = range(batch_resume, batches)
 
-for batch in batches[0:2]:
+print("Simplifying amplitudes in batches of "+str(batch_size)+":")
+for batch in tqdm(batches[0:5]):
     batch_start_index = batch*batch_size
     batch_end_index = (batch+1)*batch_size
     sqamplitudes_batch = all_sqamplitudes_unique[batch_start_index:batch_end_index]
     amplitudes_batch = all_amplitudes_unique[batch_start_index:batch_end_index]
+    ic(len(amplitudes_batch))
+    ic(len(sqamplitudes_batch))
 
     start_time = datetime.now()
     # ------------------------------
     with mp.Pool(processes=cpus) as p:
         # sqamplitudes_simplified_prefix_batch = progress_map(simplify_and_prefix, sqamplitudes_batch, n_cpu=cpus)  #, core_progress=True)
         sqamplitudes_simplified_prefix_batch = p.map(simplify_and_prefix, sqamplitudes_batch)
-    ic(len(sqamplitudes_batch))
-    ic(len(sqamplitudes_simplified_prefix_batch))
     ## output not working yet!
     ## try to append to file in batches and not each line
     out_amplitudes_str = [",".join(x) for x in amplitudes_batch]
-    out_amplitudes_str = "\n".join(out_amplitudes_str)
+    out_amplitudes_str = "\n".join(out_amplitudes_str)+"\n"
     out_sqamplitudes_str = [",".join(x) for x in sqamplitudes_simplified_prefix_batch]
-    out_sqamplitudes_str = "\n".join(out_sqamplitudes_str)
-    print(out_amplitudes_str)
+    out_sqamplitudes_str = "\n".join(out_sqamplitudes_str)+"\n"
 
     with open(outfile_amplitudes, "a") as f:
         f.write(out_amplitudes_str)
