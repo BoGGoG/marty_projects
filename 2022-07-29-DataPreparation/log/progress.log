@@ -1,120 +1,146 @@
+Starting calculation at2022-08-06 17:12:41.970928
+batch_size:20
+lines:396
+batches:20
+----------------------
+----------------------
 batch:0
-started at:2022-08-06 14:18:05.050333
-finished at:2022-08-06 14:18:05.050335
+started at:2022-08-06 17:12:41.970952
+finished at:2022-08-06 17:12:41.970953
 batch_start_index:0
 batch_end_index:20
+batch_size:20
 ----------------------
 batch:1
-started at:2022-08-06 14:18:05.050397
-finished at:2022-08-06 14:18:05.050398
+started at:2022-08-06 17:12:41.970971
+finished at:2022-08-06 17:12:41.970971
 batch_start_index:20
 batch_end_index:40
+batch_size:20
 ----------------------
 batch:2
-started at:2022-08-06 14:18:05.050414
-finished at:2022-08-06 14:18:05.050415
+started at:2022-08-06 17:13:10.463152
+finished at:2022-08-06 17:13:10.463154
 batch_start_index:40
 batch_end_index:60
+batch_size:20
 ----------------------
 batch:3
-started at:2022-08-06 14:18:05.050425
-finished at:2022-08-06 14:18:05.050426
+started at:2022-08-06 17:13:10.463202
+finished at:2022-08-06 17:13:10.463203
 batch_start_index:60
 batch_end_index:80
+batch_size:20
 ----------------------
 batch:4
-started at:2022-08-06 14:18:05.050435
-finished at:2022-08-06 14:18:05.050435
+started at:2022-08-06 17:13:10.463217
+finished at:2022-08-06 17:13:10.463218
 batch_start_index:80
 batch_end_index:100
+batch_size:20
 ----------------------
 batch:5
-started at:2022-08-06 14:18:05.050445
-finished at:2022-08-06 14:18:05.050445
+started at:2022-08-06 17:13:10.463228
+finished at:2022-08-06 17:13:10.463229
 batch_start_index:100
 batch_end_index:120
+batch_size:20
 ----------------------
 batch:6
-started at:2022-08-06 14:18:05.050456
-finished at:2022-08-06 14:18:05.050456
+started at:2022-08-06 17:13:10.463239
+finished at:2022-08-06 17:13:10.463239
 batch_start_index:120
 batch_end_index:140
+batch_size:20
 ----------------------
 batch:7
-started at:2022-08-06 14:18:05.050466
-finished at:2022-08-06 14:18:05.050466
+started at:2022-08-06 17:13:10.463248
+finished at:2022-08-06 17:13:10.463248
 batch_start_index:140
 batch_end_index:160
+batch_size:20
 ----------------------
 batch:8
-started at:2022-08-06 14:18:05.050476
-finished at:2022-08-06 14:18:05.050476
+started at:2022-08-06 17:13:10.463258
+finished at:2022-08-06 17:13:10.463258
 batch_start_index:160
 batch_end_index:180
+batch_size:20
 ----------------------
 batch:9
-started at:2022-08-06 14:18:05.050486
-finished at:2022-08-06 14:18:05.050486
+started at:2022-08-06 17:13:10.463267
+finished at:2022-08-06 17:13:10.463267
 batch_start_index:180
 batch_end_index:200
+batch_size:20
 ----------------------
 batch:10
-started at:2022-08-06 14:18:05.050495
-finished at:2022-08-06 14:18:05.050496
+started at:2022-08-06 17:13:10.463285
+finished at:2022-08-06 17:13:10.463286
 batch_start_index:200
 batch_end_index:220
+batch_size:20
 ----------------------
 batch:11
-started at:2022-08-06 14:18:05.050506
-finished at:2022-08-06 14:18:05.050506
+started at:2022-08-06 17:13:10.463295
+finished at:2022-08-06 17:13:10.463295
 batch_start_index:220
 batch_end_index:240
+batch_size:20
 ----------------------
 batch:12
-started at:2022-08-06 14:18:05.050516
-finished at:2022-08-06 14:18:05.050516
+started at:2022-08-06 17:13:10.463304
+finished at:2022-08-06 17:13:10.463304
 batch_start_index:240
 batch_end_index:260
+batch_size:20
 ----------------------
 batch:13
-started at:2022-08-06 14:18:05.050525
-finished at:2022-08-06 14:18:05.050525
+started at:2022-08-06 17:13:10.463313
+finished at:2022-08-06 17:13:10.463313
 batch_start_index:260
 batch_end_index:280
+batch_size:20
 ----------------------
 batch:14
-started at:2022-08-06 14:18:05.050535
-finished at:2022-08-06 14:18:05.050535
+started at:2022-08-06 17:13:10.463323
+finished at:2022-08-06 17:13:10.463323
 batch_start_index:280
 batch_end_index:300
+batch_size:20
 ----------------------
 batch:15
-started at:2022-08-06 14:18:05.050545
-finished at:2022-08-06 14:18:05.050545
+started at:2022-08-06 17:13:10.463332
+finished at:2022-08-06 17:13:10.463332
 batch_start_index:300
 batch_end_index:320
+batch_size:20
 ----------------------
 batch:16
-started at:2022-08-06 14:18:05.050555
-finished at:2022-08-06 14:18:05.050555
+started at:2022-08-06 17:13:10.463341
+finished at:2022-08-06 17:13:10.463341
 batch_start_index:320
 batch_end_index:340
+batch_size:20
 ----------------------
 batch:17
-started at:2022-08-06 14:18:05.050565
-finished at:2022-08-06 14:18:05.050565
+started at:2022-08-06 17:13:10.463350
+finished at:2022-08-06 17:13:10.463351
 batch_start_index:340
 batch_end_index:360
+batch_size:20
 ----------------------
 batch:18
-started at:2022-08-06 14:18:05.050575
-finished at:2022-08-06 14:18:05.050575
+started at:2022-08-06 17:13:10.463360
+finished at:2022-08-06 17:13:10.463360
 batch_start_index:360
 batch_end_index:380
+batch_size:20
 ----------------------
 batch:19
-started at:2022-08-06 14:18:05.050585
-finished at:2022-08-06 14:18:05.050585
+started at:2022-08-06 17:13:10.463369
+finished at:2022-08-06 17:13:10.463370
 batch_start_index:380
 batch_end_index:400
+batch_size:20
 ----------------------
