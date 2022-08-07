@@ -35,7 +35,15 @@ amplitudes_folders_names = ["1to2/", "2to1/", "2to2/",]# "2to3/", "3to2/", "3to3
 amplitudes_folders = [ampl_folders_prefix+a for a in amplitudes_folders_names]
 sqamplitudes_raw_folders_names = ["1to2/", "2to1/", "2to2/",]# "2to3/", "3to2/", "3to3/",]
 sqamplitudes_folders = [sqampl_raw_folders_prefix+a for a in sqamplitudes_raw_folders_names]
-cpus = 10
+cpus = 19
+
+progress_file = "log/progress_up_to_3to3.log"
+outfile_amplitudes =  "../data.nosync/QED_amplitudes_TreeLevel_UpTo3to3.txt"
+outfile_sqamplitudes =  "../data.nosync/QED_sqamplitudes_TreeLevel_UpTo3to3_simplified.txt"
+start_fresh = True   # overwrite progress_file
+batch_size = 20
+batch_resume = 0
+
 #
 # # %%
 # # # should really parallelize the simplify etc. Here is a link:
@@ -65,7 +73,7 @@ for amplitudes_folder, sqamplitudes_folder, name in zip(amplitudes_folders, sqam
     ampl, sqampl_raw = read_amplitudes_and_raw_squares(amplitudes_folder, sqamplitudes_folder)
 
     ampls_prefix = []
-    print("Working on amplitudes")
+    print("Loading amplitudes")
     for exp in tqdm(ampl):
         tree = get_tree(exp)
         tree = fix_tree(tree)
@@ -73,7 +81,7 @@ for amplitudes_folder, sqamplitudes_folder, name in zip(amplitudes_folders, sqam
         ampls_prefix.append(final_expr)
 
     sqampls_prefix = []
-    print("Working on squared amplitudes")
+    print("Loading squared amplitudes")
     for exp in tqdm(sqampl_raw):
         # simplified = sp.factor(exp)   # worked best for simplification
         # prefix = sympy_to_prefix(simplified)
@@ -130,14 +138,7 @@ all_sqamplitudes_unique = [all_sqamplitudes[i] for i in unique_indices]
 # %% [markdown]
 # All amplitudes are unique, but only 54% of squared amplitudes are unique.
 # I will still keep all of them.
-
-progress_file = "log/progress.log"
-outfile_amplitudes =  "../data.nosync/QED_amplitudes_TreeLevel_UpTo3to3.txt"
-outfile_sqamplitudes =  "../data.nosync/QED_sqamplitudes_TreeLevel_UpTo3to3_simplified.txt"
-start_fresh = True   # overwrite progress_file
-batch_size = 20
-batches = len(unique_indices) // batch_size + 1
-batch_resume = 0
+num_batches = len(unique_indices) // batch_size + 1
 
 if start_fresh:
     print("Starting fresh. Deleting "+progress_file)
@@ -151,10 +152,11 @@ if start_fresh:
         os.remove(outfile_sqamplitudes)
 
     with open(progress_file, 'a') as f:
-        f.write("Starting calculation at"+str(datetime.now())+"\n")
+        f.write("Starting calculation at:"+str(datetime.now())+"\n")
+        f.write("Worked on folders:"+"".join(amplitudes_folders_names)+"\n")
         f.write("batch_size:"+str(batch_size)+"\n")
         f.write("lines:"+str(len(unique_indices))+"\n")
-        f.write("batches:"+str(batches)+"\n")
+        f.write("num_batches:"+str(num_batches)+"\n")
         f.write("----------------------\n")
         f.write("----------------------\n")
 
@@ -171,20 +173,19 @@ else:
     ic(batch_resume)
     ic(index_resume)
     ic(batch_size_resume)
-    print("Continuing with batch " +str(batch_resume)+"/"+str(batches)+", which amounts to line "+str(index_resume)+".")
-    if batch_resume == batches:
+    print("Continuing with batch " +str(batch_resume)+"/"+str(num_batches)+", which amounts to line "+str(index_resume)+".")
+    if batch_resume == num_batches:
         print("Nothing to resume, already finished.")
 
-batches = range(batch_resume, batches)
+batches = range(batch_resume, num_batches)
 
 print("Simplifying amplitudes in batches of "+str(batch_size)+":")
-for batch in tqdm(batches[0:5]):
+for batch in tqdm(batches):
     batch_start_index = batch*batch_size
     batch_end_index = (batch+1)*batch_size
     sqamplitudes_batch = all_sqamplitudes_unique[batch_start_index:batch_end_index]
     amplitudes_batch = all_amplitudes_unique[batch_start_index:batch_end_index]
-    ic(len(amplitudes_batch))
-    ic(len(sqamplitudes_batch))
+    print("batch:", batch, "/", len(batches))
 
     start_time = datetime.now()
     # ------------------------------
@@ -207,8 +208,8 @@ for batch in tqdm(batches[0:5]):
     end_time = datetime.now()
 
     with open(progress_file, 'a') as f:
-        f.write("Appended amplitudes to "+outfile_amplitudes)
-        f.write("Appended sqamplitudes to "+outfile_sqamplitudes)
+        f.write("Appended amplitudes to "+outfile_amplitudes+"\n")
+        f.write("Appended sqamplitudes to "+outfile_sqamplitudes+"\n")
         f.write("batch:" + str(batch) + "\n")
         f.write("started at:" + str(start_time) + "\n")
         f.write("finished at:" + str(end_time) + "\n")
@@ -218,50 +219,6 @@ for batch in tqdm(batches[0:5]):
         f.write("----------------------\n")
 
 
-# # %%
-# # pool = mp.Pool(mp.cpu_count())
-# ic(mp.cpu_count())
-# cpus = 16
-# # all_sqamplitudes_simplified_prefix = run_imap_multiprocessing(simplify_and_prefix, all_sqamplitudes_unique, cpus)
-#
-# # %%
-# # def run_imap_multiprocessing(func, argument_list, num_processes):
-#
-# #     pool = mp.Pool(processes=num_processes)
-#
-# #     result_list_tqdm = []
-# #     for result in tqdm(pool.imap(func=func, iterable=argument_list), total=len(argument_list)):
-# #         result_list_tqdm.append(result)
-#
-# #     return result_list_tqdm
-#
-# # %%
-#
-# # %%
-# # from lib2to3.pgen2.literals import simple_escapes
-#
-#
-# with mp.Pool(processes=cpus) as p:
-#     all_sqamplitudes_simplified_prefix = progress_map(simplify_and_prefix, all_sqamplitudes_unique, n_cpu=cpus)  #, core_progress=True)
-#
-#
-# # %%
-# outfile_amplitudes = "../data.nosync/QED_amplitudes_TreeLevel_UpTo3to3.txt"
-# outfile_sqamplitudes = "../data.nosync/QED_sqamplitudes_TreeLevel_UpTo3to3.txt"
-#
-# # %%
-# with open(outfile_amplitudes, 'w') as f:
-#     for line in all_amplitudes_unique:
-#         line = ";".join(line)
-#         f.write(line)
-#         f.write("\n")
-#
-# with open(outfile_sqamplitudes, 'w') as f:
-#     for line in all_sqamplitudes_simplified_prefix:
-#         line = ";".join(line)
-#         f.write(line)
-#         f.write("\n")
-#
 # # %%
 # X = []
 # with open(outfile_amplitudes, 'r') as f:
