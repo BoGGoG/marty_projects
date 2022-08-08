@@ -477,3 +477,9 @@ def simplify_and_prefix(expr):
     simplified = sp.factor(expr)   # worked best for simplification
     prefix = sympy_to_prefix(simplified)
     return prefix
+
+def simplify_sqampl(expr):
+    """
+    Needed here because multiprocessing in a notebook does not take functions defined in the notebook ...
+    """
+    return sp.factor(expr)

@@ -25,7 +25,7 @@ sys.path.append(parent)
 
 from source.read_amplitudes import read_amplitudes, read_amplitudes_and_raw_squares, fix_operator_num_args, get_tree, fix_tree, fix_subscript, fix_subscripts, read_amplitudes_and_squares
 import sympy as sp
-from source.SympyPrefix import prefix_to_sympy, sympy_to_prefix, simplify_and_prefix
+from source.SympyPrefix import prefix_to_sympy, sympy_to_prefix, simplify_and_prefix, simplify_sqampl
 
 # -------------------------------------------------------------------------------------------  
 
@@ -99,8 +99,8 @@ def _queue_mgr(func_str: str, q_in: mp.Queue, q_out: mp.Queue, timeout: int, pid
             # print(f'[{pid}]: {positioning}: got')
             q_out.put((positioning, res))
         except mpq.Empty:
-            q_out.put((positioning, x))
-            print(f'[{pid}]: {positioning}: timed out ({timeout}s)')
+            q_out.put((positioning, sp.sympify(x)))
+            # print(f'[{pid}]: {positioning}: timed out ({timeout}s)')
             with open(timeout_logfile, "a") as f:
                 f.write("Timed out after "+str(timeout)+" seconds. Argument:" + x + "\n")
         finally:
@@ -139,7 +139,7 @@ def killer_pmap(func: Callable, iterable: Iterable, cpus: Optional[int] = None, 
         mp.Process(target=_queue_mgr, args=(dill.dumps(func), q_in, q_out, timeout, pid, timeout_logfile))
         for pid in range(cpus)
     ]
-    print(f'Started {len(processes)} processes')
+    # print(f'Started {len(processes)} processes')
     for proc in processes:
         proc.start()
 
@@ -165,13 +165,15 @@ sqamplitudes_raw_folders_names = ["1to2/", "2to1/", "2to2/", "2to3/", "3to2/", "
 sqamplitudes_folders = [sqampl_raw_folders_prefix+a for a in sqamplitudes_raw_folders_names]
 cpus = 19
 timeout_s = 60*30   # timeout in seconds
+# timeout_s = 0.1   # timeout in seconds
 
 progress_file = "log/progress_up_to_3to3.log"
 outfile_amplitudes =  "../data.nosync/QED_amplitudes_TreeLevel_UpTo3to3.txt"
-outfile_sqamplitudes =  "../data.nosync/QED_sqamplitudes_TreeLevel_UpTo3to3_simplified.txt"
+outfile_sqamplitudes_simplified =  "../data.nosync/QED_sqamplitudes_TreeLevel_UpTo3to3_simplified.txt"
+outfile_sqamplitudes_simplified_prefix =  "../data.nosync/QED_sqamplitudes_TreeLevel_UpTo3to3_simplified_prefix.txt"
 timeout_logfile = "log/timeout_log.log"
 start_fresh = True   # overwrite progress_file
-batch_size = 5000
+batch_size = 2000
 batch_resume = 0
 
 amplitudes = dict()
@@ -258,9 +260,12 @@ if start_fresh:
     if os.path.exists(outfile_amplitudes):
         print("Deleting "+outfile_amplitudes)
         os.remove(outfile_amplitudes)
-    if os.path.exists(outfile_sqamplitudes):
-        print("Deleting "+outfile_sqamplitudes)
-        os.remove(outfile_sqamplitudes)
+    if os.path.exists(outfile_sqamplitudes_simplified):
+        print("Deleting "+outfile_sqamplitudes_simplified)
+        os.remove(outfile_sqamplitudes_simplified)
+    if os.path.exists(outfile_sqamplitudes_simplified_prefix):
+        print("Deleting "+outfile_sqamplitudes_simplified_prefix)
+        os.remove(outfile_sqamplitudes_simplified_prefix)
     if os.path.exists(timeout_logfile):
         print("Deleting "+timeout_logfile)
         os.remove(timeout_logfile)
@@ -299,35 +304,36 @@ for batch in tqdm(batches):
     batch_end_index = (batch+1)*batch_size
     sqamplitudes_batch = all_sqamplitudes_unique[batch_start_index:batch_end_index]
     amplitudes_batch = all_amplitudes_unique[batch_start_index:batch_end_index]
-    print("batch:", batch, "/", len(batches))
+    # print("batch:", batch, "/", len(batches))
 
     start_time = datetime.now()
     # ------------------------------
-    sqamplitudes_simplified_prefix_batch = killer_pmap(simplify_and_prefix, sqamplitudes_batch, cpus=cpus, timeout=timeout_s)
 
-    # with mp.Pool(processes=cpus) as p:
-        # sqamplitudes_simplified_prefix_batch = progress_map(simplify_and_prefix, sqamplitudes_batch, n_cpu=cpus)  #, core_progress=True)
-        # sqamplitudes_simplified_prefix_batch = p.map(simplify_and_prefix, sqamplitudes_batch)
-    ## output not working yet!
-    ## try to append to file in batches and not each line
+    sqamplitudes_simplified_batch = killer_pmap(simplify_sqampl, sqamplitudes_batch, cpus=cpus, timeout=timeout_s)
+    sqamplitudes_simplified_batch_prefix = killer_pmap(sympy_to_prefix, sqamplitudes_simplified_batch, cpus=cpus, timeout=timeout_s)
 
     # ------------------------------
     out_amplitudes_str = [",".join(x) for x in amplitudes_batch]
     out_amplitudes_str = "\n".join(out_amplitudes_str)+"\n"
-    out_sqamplitudes_str = [",".join(x) for x in sqamplitudes_simplified_prefix_batch]
-    out_sqamplitudes_str = "\n".join(out_sqamplitudes_str)+"\n"
+    out_sqamplitudes_simplified_str = [str(x) for x in sqamplitudes_simplified_batch]
+    out_sqamplitudes_simplified_str = "\n".join(out_sqamplitudes_simplified_str)+"\n"   # not prefix! Just simplified
+    out_sqamplitudes_prefix_str = [",".join(x) for x in sqamplitudes_simplified_batch_prefix]
+    out_sqamplitudes_prefix_str = "\n".join(out_sqamplitudes_prefix_str)+"\n"
 
     with open(outfile_amplitudes, "a") as f:
         f.write(out_amplitudes_str)
-    with open(outfile_sqamplitudes, "a") as f:
-        f.write(out_sqamplitudes_str)
+    with open(outfile_sqamplitudes_simplified, "a") as f:
+        f.write(out_sqamplitudes_simplified_str)
+    with open(outfile_sqamplitudes_simplified_prefix, "a") as f:
+        f.write(out_sqamplitudes_prefix_str)
 
     # ------------------------------
     end_time = datetime.now()
 
     with open(progress_file, 'a') as f:
         f.write("Appended amplitudes to "+outfile_amplitudes+"\n")
-        f.write("Appended sqamplitudes to "+outfile_sqamplitudes+"\n")
+        f.write("Appended simplified sqamplitudes to "+outfile_sqamplitudes_simplified+"\n")
+        f.write("Appended simplified sqamplitudes in prefix notation to "+outfile_sqamplitudes_simplified_prefix+"\n")
         f.write("batch:" + str(batch) + "\n")
         f.write("started at:" + str(start_time) + "\n")
         f.write("finished at:" + str(end_time) + "\n")
