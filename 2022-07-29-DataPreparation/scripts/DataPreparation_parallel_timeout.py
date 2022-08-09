@@ -172,7 +172,7 @@ outfile_amplitudes =  "../data.nosync/QED_amplitudes_TreeLevel_UpTo3to3.txt"
 outfile_sqamplitudes_simplified =  "../data.nosync/QED_sqamplitudes_TreeLevel_UpTo3to3_simplified.txt"
 outfile_sqamplitudes_simplified_prefix =  "../data.nosync/QED_sqamplitudes_TreeLevel_UpTo3to3_simplified_prefix.txt"
 timeout_logfile = "log/timeout_log.log"
-start_fresh = True   # overwrite progress_file
+start_fresh = False   # overwrite progress_file
 batch_size = 2000
 batch_resume = 0
 
