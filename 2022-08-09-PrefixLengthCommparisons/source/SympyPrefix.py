@@ -322,11 +322,14 @@ def sympy_to_hybrid_prefix_rec(expression, ret):
         ret = ret + [f_str]
         return sympy_to_hybrid_prefix_rec(args[0], ret)
     if len(args) == 2:
-        ret = ret + [f_str, sympy_to_hybrid_prefix_rec(args[0], []), sympy_to_hybrid_prefix_rec(args[1], [])]
+        if f_str in ["mul", "add"]:
+            args = list(map(lambda x: sympy_to_hybrid_prefix_rec(x, []), args))
+            ret = ret + [f_str+"(", args, ")"]
+        else:
+            ret = ret + [f_str, sympy_to_hybrid_prefix_rec(args[0], []), sympy_to_hybrid_prefix_rec(args[1], [])]
     if len(args) > 2:
         # args = list(map(lambda x: sympy_to_prefix_rec(x, []), args))
         # ret = ret + repeat_operator_until_correct_binary(f_str, args)
-        print("args:", args)
         args = list(map(lambda x: sympy_to_hybrid_prefix_rec(x, []), args))
         ret = ret + [f_str+"(", args, ")"]
     return ret 
@@ -524,3 +527,19 @@ def simplify_sqampl(expr):
     Needed here because multiprocessing in a notebook does not take functions defined in the notebook ...
     """
     return sp.factor(expr)
+
+def sympify_and_prefix(expr):
+    """
+    Needed here because multiprocessing in a notebook does not take functions defined in the notebook ...
+    """
+    expr_sp = sp.sympify(expr)
+    prefix = sympy_to_prefix(expr_sp)
+    return prefix
+
+def sympify_and_hybrid_prefix(expr):
+    """
+    Needed here because multiprocessing in a notebook does not take functions defined in the notebook ...
+    """
+    expr_sp = sp.sympify(expr)
+    prefix = sympy_to_hybrid_prefix(expr_sp)
+    return prefix
