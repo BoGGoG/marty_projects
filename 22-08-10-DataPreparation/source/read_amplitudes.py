@@ -107,7 +107,7 @@ def fix_operator_num_args_hybrid(tree_expression, op="Prod"):
     """Prod 1 2 3 --> Prod( 1 2 3 )"""
     if (tree_expression[0] == op) and (len(tree_expression) > 3):
         return [op+"(", fix_operator_num_args_hybrid(tree_expression[1:]), ")"]
-    #     return [op, fix_operator_num_args(tree_expression[1], op=op)] + fix_operator_num_args([[op] + fix_operator_num_args(tree_expression[2:], op=op)])
+        # return [op, fix_operator_num_args(tree_expression[1], op=op)] + fix_operator_num_args([[op] + fix_operator_num_args(tree_expression[2:], op=op)])
     elif type(tree_expression) == type([1234]):
         return [fix_operator_num_args_hybrid(e, op=op) for e in tree_expression]
     else:
@@ -180,7 +180,6 @@ def fix_subscripts(expression):
 
     ret = list(more_itertools.collapse(expression))
 
-    ic(greek)
     greek_replacements = enumerate_indices(greek, "alpha")
     roman_replacements = enumerate_indices(roman, "i")
     # ic(greek_replacements)
