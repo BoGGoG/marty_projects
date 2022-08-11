@@ -1,6 +1,6 @@
 import os
-from subprocess import call
-from itertools import combinations_with_replacement, product, permutations
+from subprocess import call, run, DEVNULL
+from itertools import combinations_with_replacement, product, permutations, combinations
 from tqdm import tqdm
 from icecream import ic
 from pathlib import Path
@@ -9,6 +9,10 @@ import shutil
 from multiprocessing import Pool
 from itertools import cycle
 from parallelbar import progress_imap, progress_map, progress_imapu
+from shlex import split
+import copy
+
+INCLUDE_OFF_SHELL = True
 
 particles_list = [
         "electron",
@@ -47,7 +51,10 @@ def calc_amplitude(particles,
     if log_file:
         options = options + " > " + log_file
 
-    _ = call("./QED_AllParticles_IO.x " + options, shell=True)
+    # _ = call("./QED_AllParticles_IO.x " + options, shell=True)
+    call_arg = "./QED_AllParticles_IO.x " + options 
+    call_arg = split(call_arg)
+    _ = run(call_arg, shell=False, stdout=DEVNULL)
     
 
 def particles_format(particles_list):
@@ -71,7 +78,7 @@ def get_possible_n_to_m_ordered(particles_list, n, m):
     return possible_n_to_m
 
 
-def get_possible_n_to_m_unordered(particles_list, n, m):
+def get_possible_n_to_m_all_orderings(particles_list, n, m):
     """
     All thinkable n->m processes where the whole ordering matters
     e.g. (in_electron, in_electron, out_electron, out_electron, out_photon)
@@ -89,7 +96,7 @@ def get_possible_n_to_m_unordered(particles_list, n, m):
     possible_n_to_m = [permutations(x) for x in possible_n_to_m]
     possible_n_to_m = [element for sublist in possible_n_to_m for element in sublist]   # flatten list
     possible_n_to_m = [sum(p, ()) for p in possible_n_to_m]
-    possible_n_to_m = [particles_format(p) for p in possible_n_to_m]
+    # possible_n_to_m = [particles_format(p) for p in possible_n_to_m]
 
     return possible_n_to_m
 
@@ -112,10 +119,35 @@ def get_possible_n_to_m(particles_list, n, m):
 
     return possible_n_to_m
 
+
+def all_offshell_combinations(process):
+    """
+    For a process [a, b, c] return all where any number of particles is OffShell
+    Here: 
+         [['a', 'b', 'c'],
+          ['OffShell_a', 'b', 'c'],
+          ['a', 'OffShell_b', 'c'],
+          ['a', 'b', 'OffShell_c'],
+          ['OffShell_a', 'OffShell_b', 'c'],
+          ['OffShell_a', 'b', 'OffShell_c'],
+          ['a', 'OffShell_b', 'OffShell_c'],
+          ['OffShell_a', 'OffShell_b', 'OffShell_c']]
+    """
+    cbs = [combinations(range(len(process)), x) for x in range(len(process)+1)]
+    off_shell_positions = [element for sublist in cbs for element in sublist]  # flatten
+    ret = [change_to_offshell(process, pos) for pos in off_shell_positions]
+    return ret
+
+def change_to_offshell(process, positions):
+    ret = copy.deepcopy(process)
+    for p in positions:
+        ret[p] = "OffShell_" + ret[p]
+    return ret
+
 def run_all_n_to_m(particles_list, n, m, folders=["out/ampl/", "out/sq_ampl/", "out/sq_ampl_raw", "out/insertions/",
         "out/log/"], file_names=["ampl.txt", "sq_ampl.txt", "sq_ampl_raw.txt", "insertions.txt", "log.log"]):
 
-    possible_processes = get_possible_n_to_m_unordered(particles_list, n, m)
+    possible_processes = get_possible_n_to_m_all_orderings(particles_list, n, m)
     print("Calculating all", n, "to", m, "processes.")
     print("number of potential processes:", len(possible_processes))
 
@@ -141,7 +173,7 @@ def run_all_n_to_m_parallel(particles_list, n, m, folders=["out/ampl/",
                 "diagrams.txt", "log.log"],
         cpu_cores=2):
 
-    possible_processes = get_possible_n_to_m_unordered(particles_list, n, m)
+    possible_processes = get_possible_n_to_m_all_orderings(particles_list, n, m)
     print("Calculating all", n, "to", m, "processes.")
     print("number of potential processes:", len(possible_processes))
 
@@ -175,9 +207,16 @@ def run_all_n_to_m_parallel(particles_list, n, m, folders=["out/ampl/",
         _ = progress_imapu(run_process_phelper, tasks, n_cpu=cpu_cores)  #, core_progress=True)
 
 def run_process_phelper(task):
-    process_string = task[0]
+    processes = task[0]
+    global INCLUDE_OFF_SHELL
+    if INCLUDE_OFF_SHELL:
+        processes = all_offshell_combinations(list(processes))
+    else:
+        processes = [processes]
+    processes = [particles_format(p) for p in processes]
     folders = task[1]
-    return run_process(process_string, folders)
+    for process in processes:
+        return run_process(process, folders)
 
 def run_process(process_string, folders=["out/ampl/", "out/ampl_raw/",
         "out/sq_ampl/", "out/sq_ampl_raw", "out/insertions/", "out/diagrams/",
@@ -222,7 +261,7 @@ def delete_file(file):
 
 
 if __name__== "__main__":
-    cpu_cores = 17
+    cpu_cores = 10
     ampl_folder = "out/ampl/"
     ampl_raw_folder = "out/ampl_raw/"
     sqampl_folder = "out/sq_ampl/"
@@ -230,6 +269,7 @@ if __name__== "__main__":
     insertions_folder = "out/insertions/"
     diagrams_folder = "out/diagrams/"
     log_folder = "out/log/"
+    progress_file = "out/progress.txt"
     folders = [ampl_folder, ampl_raw_folder, sqampl_folder, sqampl_raw_folder, insertions_folder, diagrams_folder, log_folder]
 
     _ = Path(log_folder).mkdir(parents=True, exist_ok=True)
@@ -239,10 +279,10 @@ if __name__== "__main__":
 
 
     # run_all_n_to_m_parallel(particles_list, 1, 2, folders, cpu_cores=cpu_cores)
-    # run_all_n_to_m_parallel(particles_list, 2, 1, folders, cpu_cores=cpu_cores)
+    run_all_n_to_m_parallel(particles_list, 2, 1, folders, cpu_cores=cpu_cores)
     # run_all_n_to_m_parallel(particles_list, 2, 2, folders, cpu_cores=cpu_cores)
     # run_all_n_to_m_parallel(particles_list, 3, 1, folders, cpu_cores=cpu_cores)
-    run_all_n_to_m_parallel(particles_list, 3, 2, folders, cpu_cores=cpu_cores)
-    # run_all_n_to_m_parallel(particles_list, 2, 3, folders, cpu_cores=cpu_cores)
     # run_all_n_to_m_parallel(particles_list, 1, 3, folders, cpu_cores=cpu_cores)
+    # run_all_n_to_m_parallel(particles_list, 3, 2, folders, cpu_cores=cpu_cores)
+    # run_all_n_to_m_parallel(particles_list, 2, 3, folders, cpu_cores=cpu_cores)
     # run_all_n_to_m_parallel(particles_list, 3, 3, folders, cpu_cores=cpu_cores)
