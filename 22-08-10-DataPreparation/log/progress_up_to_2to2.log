@@ -1,0 +1,27 @@
+Starting calculation at:2022-08-12 14:14:33.362181
+Worked on folders:1to2/2to1/2to2/
+batch_size:2000
+lines:3096
+num_batches:2
+----------------------
+----------------------
+Appended amplitudes to ../data.nosync/QED_amplitudes_TreeLevel_UpTo2to2.txt
+Appended simplified sqamplitudes to ../data.nosync/QED_sqamplitudes_TreeLevel_UpTo2to2_simplified.txt
+Appended simplified sqamplitudes in prefix notation to ../data.nosync/QED_sqamplitudes_TreeLevel_UpTo2to2_simplified_prefix.txt
+batch:0
+started at:2022-08-12 14:14:33.362406
+finished at:2022-08-12 14:14:46.604237
+batch_start_index:0
+batch_end_index:2000
+batch_size:2000
+----------------------
+Appended amplitudes to ../data.nosync/QED_amplitudes_TreeLevel_UpTo2to2.txt
+Appended simplified sqamplitudes to ../data.nosync/QED_sqamplitudes_TreeLevel_UpTo2to2_simplified.txt
+Appended simplified sqamplitudes in prefix notation to ../data.nosync/QED_sqamplitudes_TreeLevel_UpTo2to2_simplified_prefix.txt
+batch:1
+started at:2022-08-12 14:14:46.604824
+finished at:2022-08-12 14:14:54.101157
+batch_start_index:2000
+batch_end_index:4000
+batch_size:2000
+----------------------
