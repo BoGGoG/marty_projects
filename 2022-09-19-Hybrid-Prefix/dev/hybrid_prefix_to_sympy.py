@@ -81,7 +81,7 @@ for key in sqamplitudes.keys():
 
 test_sqampl = all_sqamplitudes[0]
 # test_sqampl = "8*g**4*(2*m**4 - m**2*s)"
-test_sqampl = "8*g**4*(2*m**4 - m**2*(s+d))"
+# test_sqampl = "8*g**4*(2*m**4 - m**2*(s+d))"
 # test_sqampl = "8*g"
 ic(test_sqampl)
 test_sqampl_sp = sp.factor(sp.sympify(test_sqampl))
@@ -90,3 +90,4 @@ test_sqampl_prefix = sympy_to_hybrid_prefix(test_sqampl_sp)
 ic(np.array(test_sqampl_prefix))
 rec = hybrid_prefix_to_sympy(test_sqampl_prefix)
 ic(rec)
+ic(rec == test_sqampl_sp)

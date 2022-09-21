@@ -507,14 +507,9 @@ def hybrid_prefix_to_sympy(expr_arr):
             op = operators_inv[op]
             bracket_pos = next_bracket_pos(expr_arr, op_pos)
             args = expr_arr[op_pos+1:bracket_pos]
-            ic(args)
-            ic(op)
             args = [sp.sympify(a) for a in args]
-            ic(args)
             expr = op(*args)
-            ic(expr)
             ret = expr_arr[:op_pos] + [expr] + expr_arr[bracket_pos+1:]
-            ic(ret)
             return hybrid_prefix_to_sympy(ret)
         else:
             num_args = operators_nargs[op]
