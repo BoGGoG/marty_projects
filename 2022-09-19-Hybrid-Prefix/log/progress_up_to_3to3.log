@@ -1,0 +1,17 @@
+Starting calculation at:2022-09-19 11:09:01.532196
+Worked on folders:1to2/2to1/2to2/2to3/
+batch_size:2000
+lines:1759
+num_batches:1
+----------------------
+----------------------
+Appended amplitudes to ../data.nosync/QCD/QCD_amplitudes_TreeLevel_UpTo3to3.txt
+Appended simplified sqamplitudes to ../data.nosync/QCD/QCD_sqamplitudes_TreeLevel_UpTo3to3_simplified.txt
+Appended simplified sqamplitudes in prefix notation to ../data.nosync/QCD/QCD_sqamplitudes_TreeLevel_UpTo3to3_simplified_prefix.txt
+batch:0
+started at:2022-09-19 11:09:01.532449
+finished at:2022-09-19 11:09:12.461187
+batch_start_index:0
+batch_end_index:2000
+batch_size:2000
+----------------------
