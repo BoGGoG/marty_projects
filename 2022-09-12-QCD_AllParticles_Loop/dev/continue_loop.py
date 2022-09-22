@@ -13,7 +13,7 @@ from shlex import split
 import copy
 import os
 from os.path import exists
-# os.chdir("/home/boggog/Documents/PhD-ML/marty_projects/2022-09-12-QCD_AllParticles_Loop")
+os.chdir("/home/boggog/Documents/PhD-ML/marty_projects/2022-09-12-QCD_AllParticles_Loop")
 
 INCLUDE_OFF_SHELL = True
 
@@ -40,12 +40,12 @@ particles_list = [
 ]
 
 def calc_amplitude(particles, 
-        ampl_file="out/ampl.txt",
-        ampl_raw_file="out/ampl_raw.txt",
-        sqampl_file="out/sq_ampl.txt",
-        sqampl_raw_file="out/sq_ampl_raw.txt",
-        insertions_file="out/insertions.txt",
-        diagrams_file="out/diagrams.txt",
+        ampl_file="out_test/ampl.txt",
+        ampl_raw_file="out_test/ampl_raw.txt",
+        sqampl_file="out_test/sq_ampl.txt",
+        sqampl_raw_file="out_test/sq_ampl_raw.txt",
+        insertions_file="out_test/insertions.txt",
+        diagrams_file="out_test/diagrams.txt",
         log_file=False
         ):
 
@@ -145,8 +145,8 @@ def change_to_offshell(process, positions):
         ret[p] = "OffShell_" + ret[p]
     return ret
 
-def run_all_n_to_m(particles_list, n, m, folders=["out/ampl/", "out/sq_ampl/", "out/sq_ampl_raw", "out/insertions/",
-        "out/log/"], file_names=["ampl.txt", "sq_ampl.txt", "sq_ampl_raw.txt", "insertions.txt", "log.log"]):
+def run_all_n_to_m(particles_list, n, m, folders=["out_test/ampl/", "out_test/sq_ampl/", "out_test/sq_ampl_raw", "out_test/insertions/",
+        "out_test/log/"], file_names=["ampl.txt", "sq_ampl.txt", "sq_ampl_raw.txt", "insertions.txt", "log.log"]):
 
     possible_processes = get_possible_n_to_m_all_orderings(particles_list, n, m)
     print("Calculating all", n, "to", m, "processes.")
@@ -167,9 +167,9 @@ def run_all_n_to_m(particles_list, n, m, folders=["out/ampl/", "out/sq_ampl/", "
         run_process(process, folders, file_names)
 
 
-def run_all_n_to_m_parallel(particles_list, n, m, folders=["out/ampl/",
-        "out/ampl_raw", "out/sq_ampl/", "out/sq_ampl_raw/" "out/insertions/",
-        "out/diagrams/", "out/log/"], file_names=["ampl.txt", "ampl_raw.txt",
+def run_all_n_to_m_parallel(particles_list, n, m, folders=["out_test/ampl/",
+        "out_test/ampl_raw", "out_test/sq_ampl/", "out_test/sq_ampl_raw/" "out_test/insertions/",
+        "out_test/diagrams/", "out_test/log/"], file_names=["ampl.txt", "ampl_raw.txt",
                 "sq_ampl.txt", "sq_ampl_raw.txt", "insertions.txt",
                 "diagrams.txt", "log.log"],
         cpu_cores=2, delete_previous=False):
@@ -222,9 +222,9 @@ def run_process_phelper(task):
         run_process(process, folders)
     return 0
 
-def run_process(process_string, folders=["out/ampl/", "out/ampl_raw/",
-        "out/sq_ampl/", "out/sq_ampl_raw", "out/insertions/", "out/diagrams/",
-        "out/log/"], file_names=["ampl.txt", "ampl_raw.txt", "sq_ampl.txt",
+def run_process(process_string, folders=["out_test/ampl/", "out_test/ampl_raw/",
+        "out_test/sq_ampl/", "out_test/sq_ampl_raw", "out_test/insertions/", "out_test/diagrams/",
+        "out_test/log/"], file_names=["ampl.txt", "ampl_raw.txt", "sq_ampl.txt",
                 "sq_ampl_raw.txt", "insertions.txt", "diagrams.txt",
                 "log.log"]):
     basenames_without_ext = [os.path.splitext(os.path.basename(f))[0] for f in file_names]
@@ -278,19 +278,19 @@ def delete_file(file):
 
 if __name__== "__main__":
     cpu_cores = 19
-    ampl_folder = "out/ampl/"
-    ampl_raw_folder = "out/ampl_raw/"
-    sqampl_folder = "out/sq_ampl/"
-    sqampl_raw_folder = "out/sq_ampl_raw/"
-    insertions_folder = "out/insertions/"
-    diagrams_folder = "out/diagrams/"
-    log_folder = "out/log/"
-    progress_file = "out/progress.txt"
+    ampl_folder = "out_test/ampl/"
+    ampl_raw_folder = "out_test/ampl_raw/"
+    sqampl_folder = "out_test/sq_ampl/"
+    sqampl_raw_folder = "out_test/sq_ampl_raw/"
+    insertions_folder = "out_test/insertions/"
+    diagrams_folder = "out_test/diagrams/"
+    log_folder = "out_test/log/"
+    progress_file = "out_test/progress.txt"
     folders = [ampl_folder, ampl_raw_folder, sqampl_folder, sqampl_raw_folder, insertions_folder, diagrams_folder, log_folder]
     delete_previous = False   # delete previous out folder
 
     _ = Path(log_folder).mkdir(parents=True, exist_ok=True)
-    logging.basicConfig(filename = 'out/log/general_log.log',
+    logging.basicConfig(filename = 'out_test/log/general_log.log',
                     level = logging.DEBUG,
                     format = '%(asctime)s:%(levelname)s:%(name)s:%(message)s')
 
